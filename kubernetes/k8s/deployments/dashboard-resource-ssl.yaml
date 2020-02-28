@@ -4,14 +4,14 @@ metadata:
   name: echo-dashboard
   namespace: kubernetes-dashboard
   annotations:
-    cert-manager.io/cluster-issuer: "gclab-issuer"
+    cert-manager.io/cluster-issuer: "mycustom-issuer"
 spec:
   tls:
     - hosts:
-      - pvkbboard01.gclab.cz
+      - pvkbboard01.mydomain.com
       secretName: dashboard-cert
   rules:
-  - host: pvkbboard01.gclab.cz
+  - host: pvkbboard01.mydomain.com
     http:
       paths:
       - path: /
