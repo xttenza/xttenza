@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: echo-dashboard
+  namespace: kubernetes-dashboard
+  annotations:
+    cert-manager.io/cluster-issuer: "gclab-issuer"
+spec:
+  tls:
+    - hosts:
+      - pvkbboard01.gclab.cz
+      secretName: dashboard-cert
+  rules:
+  - host: pvkbboard01.gclab.cz
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 80
+

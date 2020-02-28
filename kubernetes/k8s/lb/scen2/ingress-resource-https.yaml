@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-rsc-nginxmain-https
+spec:
+  tls:
+    - hosts:
+      - nginx.gclab.cz
+      secretName: tls-dashboard
+  rules:
+  - host: nginx.gclab.cz
+    http:
+      paths:
+      - backend:
+          serviceName: nginx-deploy-main
+          servicePort: 80
+

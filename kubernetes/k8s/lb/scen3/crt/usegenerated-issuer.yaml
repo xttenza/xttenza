@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: gclab-issuer
+  namespace: cert-manager
+spec:
+  ca:
+    secretName: ca-key-pair
+#---
+#apiVersion: cert-manager.io/v1alpha2
+#kind: Certificate
+#metadata:
+#  name: example-crt
+#  namespace: cert-manager
+#spec:
+#  secretName: firstcert
+#  commonName: "firstcert-root-ca"
+#  dnsNames:
+##  - nginx.gclab.cz
+#  - pvkbmgr01.gclab.cz
+#  - pvkbwkr01.gclab.cz
+#  - pvkbwkr02.gclab.cz
+##  - pvkbwkr03.gclab.cz
+##  - pvkbboard01.gclab.cz
+#  isCA: true
+#  issuerRef:
+#    name: gclab-issuer
+#    kind: ClusterIssuer
