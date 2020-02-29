@@ -1,0 +1,19 @@
+#################################################################################
+##                                                                              #
+##   Set default setting on the machine                             		#
+##                                                                              #
+##                                                                              #
+##						                            	#
+## 								               	#
+#################################################################################
+#
+- name: Default machine setting
+  hosts: "{{variable_host}}"
+  become: yes
+  tasks:
+####here is fist called task ##########
+    - name: Default setting
+      include_tasks: default_settings_as_task/default_setting_as_task.yml
+####here is second different called task ##########
+    - name: NTP config
+      include_tasks: ntp/ntp.yml

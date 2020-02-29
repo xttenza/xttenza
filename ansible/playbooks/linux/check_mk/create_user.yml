@@ -1,0 +1,100 @@
+#################################################################################
+##                                                                              #
+##   Set check_mk agent			                                    	#
+##                                                                              #
+##                                                                              #
+##						                            	#
+## 								               	#
+#################################################################################
+#
+
+- name: create folder to copy
+  file:
+    path: /tmp/check_mk
+    state: directory
+  delegate_to: localhost
+  sudo: no
+
+- name: Download check_mk
+  command: wget https://check_mk_server/prg/check_mk/agents/{{item.name}} --no-check-certificate -P /tmp/check_mk/
+  delegate_to: localhost
+  sudo: no
+  with_items:
+    - {name: check-mk-agent-1.6.0p2-1.noarch.rpm}
+
+- name: Download check_mk plugin logwatch
+  command: wget https://check_mk_server/prg/check_mk/agents/plugins/{{item}} --no-check-certificate -P /tmp/check_mk/
+  delegate_to: localhost
+  sudo: no
+  with_items:
+    - "{{ plugins }}"
+
+- name: copy Check_mk to remotesystem
+  copy:
+    src: "/tmp/check_mk"
+    dest: "/tmp/"
+
+- name: Finding RPM files
+  find:
+    paths: "/tmp/check_mk/"
+    patterns: "*.rpm"
+  register: rpm_result
+
+- name: Install RPM
+  yum:
+    name: "{{ item.path }}"
+    state: present
+  with_items: "{{ rpm_result.files }}"
+
+- name: Check_mk plugin logwatch add to plugin
+  copy:
+    src: "/tmp/check_mk/{{item}}"
+    dest: /usr/lib/check_mk_agent/plugins/{{item}}
+    mode: 0755
+    remote_src: yes
+  with_items: "{{ plugins }}"
+
+- name: Create check_mk service account
+  user:
+    name: check_mk
+    state: present
+
+- name: make dir .ssh
+  file:
+    path: /home/{{user}}/.ssh
+    state: directory
+    owner: check_mk
+    group: check_mk
+    mode: 0700
+
+- name: put pubkey
+  copy:
+    backup: yes
+    dest: "/home/{{user}}/.ssh/authorized_keys"
+    content: |
+       {{ pubkey }}
+
+- name: update file
+  file:
+    path: "/home/{{user}}/.ssh/authorized_keys"
+    state: file
+    owner: check_mk
+    group: check_mk
+    mode: 0600
+
+- name: Copy sudo definition for check_mk
+  copy:
+      src: sudo/sudo_check_mk
+      dest: /etc/sudoers.d/sudo-check-mk
+
+- name: remove all files from /tmp/check_mk/
+  file:
+    path: /tmp/check_mk/
+    state: absent
+  delegate_to: localhost
+  sudo: no
+
+- name: remove all files from remote /tmp/check_mk/
+  file:
+    path: /tmp/check_mk/
+    state: absent

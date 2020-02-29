@@ -1,0 +1,51 @@
+#################################################################################
+##                                                                              #
+##   Join linux machine to AD
+##   If you have correctly setted a domain, you don't need setup anything else
+##   neither a sssd.conf
+##   
+##   
+##   
+##
+##                                                                             	#
+## 								               	#
+#################################################################################
+
+- name: Install the required packages
+  yum:
+    name: realmd,sssd,oddjob,oddjob-mkhomedir,adcli,samba-common,samba-common-tools,ntpdate,ntp,python-pip
+    state: present
+  environment:
+    HTTP_PROXY: 'proxy:port' ########This is not required if you don't have a proxy
+    HTTPS_PROXY: 'proxy:port'
+  notify:
+    - restart realmd
+
+- name: Install pexpect using pip
+  pip:
+    name: pexpect
+  environment:
+    HTTP_PROXY: 'proxy:port' ##########same case
+    HTTPS_PROXY: 'proxy:port' 
+
+- name: Include vars from ad_bind_password.yaml into the 'bind_password' variable.
+  include_vars:
+    file: /var/lib/vault/adjoin.yml
+
+- name: Join system to AD
+  expect:
+    command: /bin/bash -c "/usr/sbin/realm join --user=adjoin_only@domain.com  domain.com"
+    responses:
+      Password for *: "{{ bind_password }}"
+
+
+- name: restart realmd
+  service:
+    name: realmd
+    state: restarted
+
+- name: restart sssd
+  service:
+    name: sssd
+    state: restarted
+

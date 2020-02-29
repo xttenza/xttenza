@@ -1,0 +1,49 @@
+#################################################################################
+##                                                                              #
+##   Set firwall rules for youzone                                           	#
+##                                                                              #
+##                                                                              #
+##						                            	#
+## 								               	#
+#################################################################################
+#
+- name: Enable firewalld
+  service: name=firewalld state=started enabled=yes
+
+- name: Remove ipv6
+  command: firewall-cmd --remove-service dhcpv6-client --permanent
+
+- name: Block ping from public
+  command: firewall-cmd --zone=public --add-icmp-block=echo-reply --permanent
+
+- name: add youzone zone
+  firewalld:
+    zone: youzone
+    state: present
+    permanent: yes
+
+- name: add source youzone
+  firewalld: zone={{item.zone}} source={{item.source}} permanent={{item.permanency}} state={{item.state}}
+  with_items:
+    - {zone: youzone, source: 172.18.81.0/24, permanency: true, state: enabled}
+    - {zone: youzone, source: 192.168.0.0/16, permanency: true, state: enabled}
+    - {zone: youzone, source: 172.30.26.0/25, permanency: true, state: enabled}
+    - {zone: youzone, source: 172.27.72.0/20, permanency: true, state: enabled}
+    - {zone: youzone, source: 172.27.88.0/22, permanency: true, state: enabled}
+    - {zone: youzone, source: 172.18.50.0/24, permanency: true, state: enabled}
+    - {zone: youzone, source: 172.18.210.0/24, permanency: true, state: enabled}
+    - {zone: youzone, source: 172.18.50.0/24, permanency: true, state: enabled}
+
+- name: add service youzone
+  firewalld: service={{item.service}} permanent={{item.permanency}} state={{item.state}} zone={{item.zone}}
+  with_items:
+    - {service: https, permanency: true, state: enabled, zone: youzone}
+    - {service: ssh, permanency: true, state: enabled, zone: youzone}
+
+- name: add ports youzone check_mk
+  firewalld: port={{item.port}} permanent={{item.permanency}} state={{item.state}} zone={{item.zone}}
+  with_items:
+    - {port: 6556/tcp, permanency: true, state: enabled, zone: youzone}
+                  
+- name: reload firewalld
+  command: firewall-cmd --reload

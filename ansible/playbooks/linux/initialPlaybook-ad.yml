@@ -1,0 +1,24 @@
+#################################################################################
+##                                                                              #
+##   add machine to the domain		                                    	#
+##                                                                              #
+##                                                                              #
+##						                            	#
+## 								               	#
+#################################################################################
+#
+- name: Join machine to AD initialPlaybook
+  hosts: "{{variable_host}}"
+  tasks:
+    - name: Default setting
+      include_tasks: default_settings_as_task/adjoin.yml
+  handlers:
+    - name: restart realmd
+      service:
+        name: realmd
+        state: restarted
+
+    - name: restart sssd
+      service:
+        name: sssd
+        state: restarted

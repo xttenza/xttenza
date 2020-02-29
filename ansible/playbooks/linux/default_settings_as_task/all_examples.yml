@@ -1,0 +1,22 @@
+#################################################################################
+##                                                                              #
+##   Main playbook where I call all other examples
+##   Check_mk agent
+##  
+##
+##
+##                                                                             	#
+## 								               	#
+#################################################################################
+- name: Check_mk agent
+  include_tasks: ../check_mk/create_user.yml
+  vars:
+    user: check_mk
+    pubkey: command="sudo /usr/bin/check_mk_agent" ssh-rsa yourkey check_mk@monitoringserver01
+    plugins:
+      - mk_logwatch
+      - mk_logins
+
+- name: Check/setup firewalld
+  include_tasks: ../firewall/firewalld.yml
+  
